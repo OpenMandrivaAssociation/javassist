@@ -33,7 +33,7 @@
 Summary:        Java Programming Assistant: bytecode manipulation
 Name:           javassist
 Version:        3.5
-Release:        %mkrel 0.cr1.2.0.1
+Release:        %mkrel 0.cr1.2.0.2
 Epoch:          0
 License:        MPL and LGPL
 URL:            http://www.csg.is.titech.ac.jp/~chiba/javassist/
@@ -44,8 +44,6 @@ Source0:        javassist-3.5.CR1-src.tar.gz
 BuildRequires:  jpackage-utils >= 0:1.6
 BuildRequires:  ant >= 0:1.6
 %if %{gcj_support}
-Requires(post): java-gcj-compat
-Requires(postun): java-gcj-compat
 BuildRequires:  java-gcj-compat-devel
 %else
 BuildArch:      noarch
