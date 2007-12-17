@@ -49,7 +49,6 @@ BuildRequires:  java-gcj-compat-devel
 BuildArch:      noarch
 BuildRequires:  java-devel
 %endif
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 Javassist (Java Programming Assistant) makes Java 
