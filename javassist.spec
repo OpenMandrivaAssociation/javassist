@@ -28,12 +28,12 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define gcj_support 1
+%define gcj_support 0
 
 Summary:        Java Programming Assistant: bytecode manipulation
 Name:           javassist
 Version:        3.5
-Release:        %mkrel 0.cr1.2.0.3
+Release:        %mkrel 1.cr1.2.0.3
 Epoch:          0
 License:        MPL and LGPL
 URL:            http://www.csg.is.titech.ac.jp/~chiba/javassist/
