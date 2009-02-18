@@ -32,7 +32,7 @@
 
 Summary:        Java Programming Assistant: bytecode manipulation
 Name:           javassist
-Version:        3.9
+Version:        3.9.0
 Release:        %mkrel 2.0.0
 Epoch:          0
 License:        MPL and LGPL
