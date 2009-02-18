@@ -32,15 +32,16 @@
 
 Summary:        Java Programming Assistant: bytecode manipulation
 Name:           javassist
-Version:        3.5
-Release:        %mkrel 1.cr1.2.0.3
+Version:        3.9
+Release:        %mkrel 2.0.0
 Epoch:          0
 License:        MPL and LGPL
 URL:            http://www.csg.is.titech.ac.jp/~chiba/javassist/
 Group:          Development/Java
-Source0:        javassist-3.5.CR1-src.tar.gz
+Source0:        javassist3.9.GA.zip
 # cvs -d:pserver:anonymous@anoncvs.forge.jboss.com:/cvsroot/jboss export -r Javassist_3_5_CR1 javassist
 
+Patch0:         javassist-buildfile-nosource1.4-nosrcjar.patch
 BuildRequires:  java-rpmbuild >= 0:1.6
 BuildRequires:  ant >= 0:1.6
 %if %{gcj_support}
@@ -52,21 +53,21 @@ BuildRequires:  java-devel
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
-Javassist (Java Programming Assistant) makes Java 
-bytecode manipulation simple. It is a class library 
-for editing bytecodes in Java; it enables Java 
-programs to define a new class at runtime and to 
-modify a class file when the JVM loads it. Unlike 
-other similar bytecode editors, Javassist provides 
-two levels of API: source level and bytecode level. 
-If the users use the source-level API, they can edit 
-a class file without knowledge of the specifications 
-of the Java bytecode. The whole API is designed with 
-only the vocabulary of the Java language. You can even 
-specify inserted bytecode in the form of source text; 
-Javassist compiles it on the fly. On the other hand, 
-the bytecode-level API allows the users to directly 
-edit a class file as other editors. 
+Javassist (Java Programming Assistant) makes Java
+bytecode manipulation simple. It is a class library
+for editing bytecodes in Java; it enables Java
+programs to define a new class at runtime and to
+modify a class file when the JVM loads it. Unlike
+other similar bytecode editors, Javassist provides
+two levels of API: source level and bytecode level.
+If the users use the source-level API, they can edit
+a class file without knowledge of the specifications
+of the Java bytecode. The whole API is designed with
+only the vocabulary of the Java language. You can even
+specify inserted bytecode in the form of source text;
+Javassist compiles it on the fly. On the other hand,
+the bytecode-level API allows the users to directly
+edit a class file as other editors.
 
 %package demo
 Summary:        Samples for %{name}
@@ -91,7 +92,8 @@ Group:          Development/Java
 %{summary}.
 
 %prep
-%setup -q -n %{name}-%{version}.CR1-src
+%setup -q # -n %{name}-%{version}
+%patch0 -p0
 for j in $(find . -name "*.jar"); do
         mv $j $j.no
 done
