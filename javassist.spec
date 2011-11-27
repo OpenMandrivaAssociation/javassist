@@ -1,6 +1,6 @@
 Name:           javassist
 Version:        3.14.0
-Release:        3
+Release:        5
 Summary:        The Java Programming Assistant provides simple Java bytecode manipulation
 Group:          Development/Java
 License:        MPLv1.1 or LGPLv2+
