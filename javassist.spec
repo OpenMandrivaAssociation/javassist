@@ -63,25 +63,25 @@ mvn-jpp \
 install javadoc:javadoc
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
-install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
-install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/maven2/poms
-install -pm 644 pom.xml $RPM_BUILD_ROOT/%{_datadir}/maven2/poms/JPP-%{name}.pom
+install -d -m 755 %{buildroot}%{_javadir}
+install -d -m 755 %{buildroot}%{_datadir}/maven2/poms
+install -pm 644 pom.xml %{buildroot}/%{_datadir}/maven2/poms/JPP-%{name}.pom
 %add_to_maven_depmap %{name} %{name} %{version}%{ext_ver} JPP %{name}
 
 # jar
-install -d $RPM_BUILD_ROOT%{_javadir}
-install -m644 target/%{name}-%{version}-GA.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-ln -s %{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
+install -d %{buildroot}%{_javadir}
+install -m644 target/%{name}-%{version}-GA.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
+ln -s %{name}-%{version}.jar %{buildroot}%{_javadir}/%{name}.jar
 
 # javadoc
-install -d $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -rp target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+install -d %{buildroot}%{_javadocdir}/%{name}-%{version}
+cp -rp target/site/apidocs/* %{buildroot}%{_javadocdir}/%{name}-%{version}
+ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %post
 %update_maven_depmap
