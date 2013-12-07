@@ -33,7 +33,7 @@
 Summary:	Java Programming Assistant:	bytecode manipulation
 Name:		javassist
 Version:	3.9.0
-Release:	2.0.6
+Release:	2.0.7
 License:	MPL and LGPL
 Url:		http://www.csg.is.titech.ac.jp/~chiba/javassist/
 Group:		Development/Java
