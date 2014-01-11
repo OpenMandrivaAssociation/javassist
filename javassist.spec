@@ -1,153 +1,155 @@
-# Copyright (c) 2000-2005, JPackage Project
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the
-#    distribution.
-# 3. Neither the name of the JPackage Project nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
+%{?_javapackages_macros:%_javapackages_macros}
+Name:           javassist
+Version:        3.16.1
+Release:        6.1%{?dist}
+Summary:        The Java Programming Assistant provides simple Java bytecode manipulation
 
-%define gcj_support 0
+License:        MPLv1.1 or LGPLv2+ or ASL 2.0
+URL:            http://www.csg.is.titech.ac.jp/~chiba/javassist/
+Source0:        http://downloads.sourceforge.net/jboss/%{name}-%{version}-GA.zip
+BuildArch:      noarch
 
-Summary:	Java Programming Assistant:	bytecode manipulation
-Name:		javassist
-Version:	3.9.0
-Release:	2.0.9
-License:	MPL and LGPL
-Url:		http://www.csg.is.titech.ac.jp/~chiba/javassist/
-Group:		Development/Java
-Source0:	javassist3.9.GA.zip
-# cvs -d:pserver:anonymous@anoncvs.forge.jboss.com:/cvsroot/jboss export -r Javassist_3_5_CR1 javassist
-Patch0:		javassist-buildfile-nosource1.4-nosrcjar.patch
-%if !%{gcj_support}
-BuildArch:	noarch
-BuildRequires:	java-devel
-%else
-BuildRequires:	java-gcj-compat-devel
-%endif
-BuildRequires:	ant >= 0:1.6
-BuildRequires:	java-rpmbuild >= 0:1.6
+BuildRequires:     java-devel >= 1:1.6.0
+BuildRequires:     jpackage-utils
+
+BuildRequires:     maven-local
+BuildRequires:     maven-compiler-plugin
+BuildRequires:     maven-install-plugin
+BuildRequires:     maven-jar-plugin
+BuildRequires:     maven-javadoc-plugin
+BuildRequires:     maven-resources-plugin
+BuildRequires:     maven-surefire-plugin
+BuildRequires:     maven-surefire-provider-junit
+BuildRequires:     maven-source-plugin
+BuildRequires:     maven-antrun-plugin
+BuildRequires:     maven-doxia-sitetools
+
+Requires:          java >= 1:1.6.0
+Requires:          jpackage-utils
 
 %description
-Javassist (Java Programming Assistant) makes Java
-bytecode manipulation simple. It is a class library
-for editing bytecodes in Java; it enables Java
-programs to define a new class at runtime and to
-modify a class file when the JVM loads it. Unlike
-other similar bytecode editors, Javassist provides
-two levels of API:	source level and bytecode level.
-If the users use the source-level API, they can edit
-a class file without knowledge of the specifications
-of the Java bytecode. The whole API is designed with
-only the vocabulary of the Java language. You can even
-specify inserted bytecode in the form of source text;
-Javassist compiles it on the fly. On the other hand,
-the bytecode-level API allows the users to directly
-edit a class file as other editors.
-
-%package demo
-Summary:	Samples for %{name}
-Group:		Development/Java
-Requires:	javassist = %{EVRD}
-
-%description demo
-%{summary}.
+Javassist enables Java programs to define a new class at runtime and to
+modify a class file when the JVM loads it. Unlike other similar
+bytecode editors, Javassist provides two levels of API: source level
+and bytecode level. If the users use the source-level API, they can
+edit a class file without knowledge of the specifications of the Java
+bytecode. The whole API is designed with only the vocabulary of the
+Java language. You can even specify inserted bytecode in the form of
+source text; Javassist compiles it on the fly. On the other hand, the
+bytecode-level API allows the users to directly edit a class file as
+other editors.
 
 %package javadoc
-Summary:	Javadoc for %{name}
-Group:		Development/Java
+Summary:           Javadocs for javassist
+
+Requires:          jpackage-utils
 
 %description javadoc
-%{summary}.
-
-%package manual
-Summary:	Tutorial for %{name}
-Group:		Development/Java
-
-%description manual
-%{summary}.
+javassist development documentation.
 
 %prep
-%setup -q
-%patch0 -p0
-for j in $(find . -name "*.jar"); do
-        mv $j $j.no
-done
-#remove the clas it needs com.sun.jdi to build
-rm src/main/javassist/util/HotSwapper.java
+%setup -q -n %{name}-%{version}-GA
+
+mkdir runtest
+find . -name \*.jar -type f -delete
 
 %build
-%{ant} dist
+mvn-rpmbuild install javadoc:javadoc
 
 %install
-# jars
-mkdir -p %{buildroot}%{_javadir}
-cp -p %{name}.jar \
-  %{buildroot}%{_javadir}/%{name}-%{version}.jar
-(cd %{buildroot}%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
 
-# demo
-mkdir -p %{buildroot}%{_datadir}/%{name}-%{version}
-cp -pr sample/* %{buildroot}%{_datadir}/%{name}-%{version}
+install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
+install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
+install -pm 644 pom.xml $RPM_BUILD_ROOT/%{_mavenpomdir}/JPP-%{name}.pom
+
+# jar
+install -d $RPM_BUILD_ROOT%{_javadir}
+install -m644 target/%{name}-%{version}-GA.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
+
+%add_maven_depmap JPP-%{name}.pom %{name}.jar -a "%{name}:%{name}"
 
 # javadoc
-mkdir -p %{buildroot}%{_javadocdir}/%{name}-%{version}
-cp -pr html/* %{buildroot}%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name} # ghost symlink
+install -d $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+cp -rp target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
-# manual
-mkdir -p %{buildroot}%{_docdir}/%{name}-%{version}/tutorial
-cp -pr tutorial/* %{buildroot}%{_docdir}/%{name}-%{version}/tutorial
-cp -p License.html %{buildroot}%{_docdir}/%{name}-%{version}
+%pre javadoc
+# workaround for rpm bug, can be removed in F-18
+[ $1 -gt 1 ] && [ -L %{_javadocdir}/%{name} ] && \
+rm -rf $(readlink -f %{_javadocdir}/%{name}) %{_javadocdir}/%{name} || :
 
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
-
-%if %{gcj_support}
-%post
-%{update_gcjdb}
-
-%postun
-%{clean_gcjdb}
-%endif
 
 %files
-%doc %{_docdir}/%{name}-%{version}/License.html
-%{_javadir}/*.jar
-%if %{gcj_support}
-%dir %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/*
-%endif
-
-%files demo
-%{_datadir}/%{name}-%{version}
+%doc License.html Readme.html
+%{_javadir}/%{name}.jar
+%{_mavenpomdir}/JPP-%{name}.pom
+%{_mavendepmapfragdir}/%{name}
 
 %files javadoc
-%doc %{_javadocdir}/%{name}-%{version}
-%doc %{_javadocdir}/%{name}
+%doc License.html
+%{_javadocdir}/%{name}
 
-%files manual
-%doc %{_docdir}/%{name}-%{version}/tutorial
+%changelog
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.16.1-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
+* Tue Feb 26 2013 Mikolaj Izdebski <mizdebsk@redhat.com> - 3.16.1-5
+- Remove unneeded BR on maven-doxia
+- Resolves: rhbz#915607
+
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.16.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Wed Feb 06 2013 Java SIG <java-devel@lists.fedoraproject.org> - 3.16.1-3
+- Update for https://fedoraproject.org/wiki/Fedora_19_Maven_Rebuild
+- Replace maven BuildRequires with maven-local
+
+* Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.16.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Tue Apr 24 2012 Andy Grimm <agrimm@gmail.com> - 3.16.1-1
+- Update to latest upstream release.
+
+* Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.15.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Tue Sep 20 2011 Alexander Kurtakov <akurtako@redhat.com> 3.15.0-1
+- Update to latest upstream release.
+- Add javassist:javassist depmap.
+- The project is now triple licensed.
+
+* Wed Aug 31 2011 Stanislav Ochotnicky <sochotnicky@redhat.com> - 3.14.0-5
+- Fixes according to current guidelines
+
+* Tue Aug 30 2011 Andy Grimm <agrimm@gmail.com> - 3.14.0-4
+- Switch to Maven 3 build.
+
+* Tue Aug 30 2011 John5342 <john5342 at, fedoraproject.org> - 3.14.0-3
+- Remove ext_ver macro usage leftover after last rebase (rhbz#734255)
+
+* Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.14.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Thu Nov 4 2010 Alexander Kurtakov <akurtako@redhat.com> 3.14.0-1
+- Update to 3.14.0 upstream version.
+- Various fixes in preparation for merge review.
+
+* Fri Feb 12 2010 Alexander Kurtakov <akurtako@redhat.com> 3.9.0-7
+- Add maven-doxia BRs.
+
+* Fri Feb 12 2010 Alexander Kurtakov <akurtako@redhat.com> 3.9.0-6
+- Remove not needed BR. Fixes rhbz#539176.
+
+* Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.9.0-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+
+* Wed Feb 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.9.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+
+* Tue Jan 27 2009 John5342 <john5342 at, fedoraproject.org> - 3.9.0-3
+- Correct group id for maven depmap
+
+* Mon Jan 26 2009 John5342 <john5342 at, fedoraproject.org> - 3.9.0-2
+- Build using maven and install maven stuff (fixes bug 480428)
+
+* Tue Dec 16 2008 Sandro Mathys <red at fedoraproject.org> - 3.9.0-1
+- initial build
