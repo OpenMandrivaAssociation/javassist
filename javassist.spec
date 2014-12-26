@@ -1,16 +1,21 @@
 %{?_javapackages_macros:%_javapackages_macros}
-Name:           javassist
-Version:        3.16.1
-Release:        6.1%{?dist}
-Summary:        The Java Programming Assistant provides simple Java bytecode manipulation
+%global upstream_version rel_%(sed s/\\\\./_/g <<<"%{version}")_ga
 
+Name:           javassist
+Version:        3.18.1
+Release:        2.1
+Summary:        The Java Programming Assistant provides simple Java bytecode manipulation
+Group:          Development/Java
 License:        MPLv1.1 or LGPLv2+ or ASL 2.0
-URL:            http://www.csg.is.titech.ac.jp/~chiba/javassist/
-Source0:        http://downloads.sourceforge.net/jboss/%{name}-%{version}-GA.zip
+URL:            http://www.csg.is.titech.ac.jp/~chiba/%{name}/
 BuildArch:      noarch
 
-BuildRequires:     java-devel >= 1:1.6.0
-BuildRequires:     jpackage-utils
+Source0:        http://github.com/jboss-%{name}/%{name}/archive/%{upstream_version}.tar.gz
+
+Patch0:         0001-Remove-usage-of-junit.awtui-and-junit.swingui.patch
+
+BuildRequires:  java-devel >= 1:1.6.0
+BuildRequires:  jpackage-utils
 
 BuildRequires:     maven-local
 BuildRequires:     maven-compiler-plugin
@@ -23,9 +28,6 @@ BuildRequires:     maven-surefire-provider-junit
 BuildRequires:     maven-source-plugin
 BuildRequires:     maven-antrun-plugin
 BuildRequires:     maven-doxia-sitetools
-
-Requires:          java >= 1:1.6.0
-Requires:          jpackage-utils
 
 %description
 Javassist enables Java programs to define a new class at runtime and to
@@ -41,54 +43,48 @@ other editors.
 
 %package javadoc
 Summary:           Javadocs for javassist
-
+Group:             Documentation
 Requires:          jpackage-utils
 
 %description javadoc
 javassist development documentation.
 
 %prep
-%setup -q -n %{name}-%{version}-GA
-
-mkdir runtest
+%setup -q -n %{name}-%{upstream_version}
 find . -name \*.jar -type f -delete
+mkdir runtest
+%patch0 -p1
+%pom_xpath_remove "pom:profile[pom:id='default-tools']"
+%pom_add_dep com.sun:tools
+
+%mvn_file : %{name}
+%mvn_alias : %{name}:%{name}
 
 %build
-mvn-rpmbuild install javadoc:javadoc
+# TODO: enable tests
+%mvn_build -f
 
 %install
+%mvn_install
 
-install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
-install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
-install -pm 644 pom.xml $RPM_BUILD_ROOT/%{_mavenpomdir}/JPP-%{name}.pom
-
-# jar
-install -d $RPM_BUILD_ROOT%{_javadir}
-install -m644 target/%{name}-%{version}-GA.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
-
-%add_maven_depmap JPP-%{name}.pom %{name}.jar -a "%{name}:%{name}"
-
-# javadoc
-install -d $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-cp -rp target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-
-%pre javadoc
-# workaround for rpm bug, can be removed in F-18
-[ $1 -gt 1 ] && [ -L %{_javadocdir}/%{name} ] && \
-rm -rf $(readlink -f %{_javadocdir}/%{name}) %{_javadocdir}/%{name} || :
-
-
-%files
+%files -f .mfiles
 %doc License.html Readme.html
-%{_javadir}/%{name}.jar
-%{_mavenpomdir}/JPP-%{name}.pom
-%{_mavendepmapfragdir}/%{name}
 
-%files javadoc
+%files javadoc -f .mfiles-javadoc
 %doc License.html
-%{_javadocdir}/%{name}
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.18.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Mon Apr 28 2014 Mikolaj Izdebski <mizdebsk@redhat.com> - 3.18.1-1
+- Update to upstream version 3.18.1
+- Remove workaround for rpm bug, can be removed in F-18
+- Update to current packaging guidelines
+
+* Tue Mar 04 2014 Stanislav Ochotnicky <sochotnicky@redhat.com> - 3.16.1-7
+- Use Requires: java-headless rebuild (#1067528)
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.16.1-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
@@ -153,3 +149,4 @@ rm -rf $(readlink -f %{_javadocdir}/%{name}) %{_javadocdir}/%{name} || :
 
 * Tue Dec 16 2008 Sandro Mathys <red at fedoraproject.org> - 3.9.0-1
 - initial build
+
