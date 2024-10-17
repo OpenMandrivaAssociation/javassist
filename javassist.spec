@@ -7,7 +7,7 @@ Release:        2.4
 Summary:        The Java Programming Assistant provides simple Java bytecode manipulation
 Group:          Development/Java
 License:        MPLv1.1 or LGPLv2+ or ASL 2.0
-URL:            http://www.csg.is.titech.ac.jp/~chiba/%{name}/
+URL:            https://www.csg.is.titech.ac.jp/~chiba/%{name}/
 BuildArch:      noarch
 
 Source0:        http://github.com/jboss-%{name}/%{name}/archive/%{upstream_version}.tar.gz
